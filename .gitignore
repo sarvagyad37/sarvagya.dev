@@ -39,3 +39,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# irrelevant files - keeping only website code
+/Stock-Market-Prediction-main/
+CV_extracted_text.txt
+New CV sanchit v3.pdf
+extract_cv.py
+Screenshot*.png
+DEVELOPMENT_PLAN.md
+GITHUB_REPOS_ACTION_NEEDED.md
+IMPLEMENTATION_SUMMARY.md
+VERIFIED_TRACKING.md
+.cursor/

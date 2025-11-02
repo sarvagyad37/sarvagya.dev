@@ -1,4 +1,4 @@
-import { Terminal, ExternalLink, BookOpen, FileText, Presentation, Mic, Play, Github } from "lucide-react";
+import { Terminal, ExternalLink, BookOpen, FileText, Presentation, Mic, Play, Github, Trophy } from "lucide-react";
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,17 +13,19 @@ interface Project {
   image?: string; // Path to screenshot/demo image
   demo?: string; // Demo URL
   year?: number;
+  hackathonWinner?: string; // Hackathon award/achievement
 }
 
 interface Publication {
   title: string;
   venue: string;
   description: string[];
-  type?: "poster" | "oral";
+  type?: "poster" | "oral" | "conference" | "manuscript";
   links: { label: string; url: string }[];
   year?: number;
   authors?: string;
   volume?: string;
+  intendedJournal?: string; // For manuscripts
 }
 
 const roomContexts: Record<string, { title: string; subtitle: string; description: string }> = {
@@ -43,7 +45,7 @@ export function ProjectsRoom({ projects }: { projects: Project[] }) {
   const roomContext = roomContexts.projects;
   
   // Group projects by category
-  const categories = ["Quantum Transport", "Machine Learning", "Finance & Trading", "Distributed Systems"];
+  const categories = ["Quantum Transport", "Machine Learning", "Finance & Trading", "Distributed Systems", "AR/VR & Mobile", "Web Development"];
   const projectsByCategory = categories.reduce((acc, category) => {
     acc[category] = projects.filter(p => p.category === category);
     return acc;
@@ -133,13 +135,14 @@ function ProjectCard({ project }: { project: Project }) {
               </span>
             )}
           </div>
-          {project.category && (
-            <span className="inline-block text-xs px-2 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 mb-2">
-              {project.category}
-            </span>
-          )}
         </div>
         <div className="flex items-center gap-2">
+          {project.hackathonWinner && (
+            <span className="inline-flex items-center gap-1.5 text-xs px-2 py-0.5 bg-primary/10 text-primary rounded border border-primary/20 font-semibold">
+              <Trophy className="w-3 h-3" />
+              {project.hackathonWinner}
+            </span>
+          )}
           {project.demo && (
             <a
               href={project.demo}
@@ -154,7 +157,7 @@ function ProjectCard({ project }: { project: Project }) {
           {project.url && project.url !== "#" && (
             <a 
               href={project.url} 
-              target="_blank" 
+              target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded border border-border/50 hover:border-primary hover:bg-primary/5 transition-colors text-muted-foreground hover:text-primary"
               title="View on GitHub"
@@ -210,12 +213,16 @@ function ProjectCard({ project }: { project: Project }) {
 
 export function AcademicRoom({ publications }: { publications: Publication[] }) {
   const roomContext = roomContexts.academic;
-  const [activeFilter, setActiveFilter] = useState<"all" | "journal" | "poster" | "oral">("all");
+  const [activeFilter, setActiveFilter] = useState<"all" | "journal" | "poster" | "oral" | "conference" | "manuscript">("all");
   
   // Group publications by type
   const journals = publications.filter(p => !p.type);
   const posters = publications.filter(p => p.type === "poster");
   const oral = publications.filter(p => p.type === "oral");
+  const conference = publications.filter(p => p.type === "conference");
+  const manuscripts = publications.filter(p => p.type === "manuscript");
+  
+  const total = publications.length;
   
   // Extract date from venue string
   const getDateFromVenue = (venue: string): string => {
@@ -286,21 +293,29 @@ export function AcademicRoom({ publications }: { publications: Publication[] }) 
   const sortedJournals = [...journals].sort(sortByYear);
   const sortedPosters = [...posters].sort(sortByYear);
   const sortedOral = [...oral].sort(sortByYear);
+  const sortedConference = [...conference].sort(sortByYear);
+  const sortedManuscripts = [...manuscripts].sort(sortByYear);
   
   // Determine which sections to show based on filter
   const showJournals = activeFilter === "all" || activeFilter === "journal";
   const showPosters = activeFilter === "all" || activeFilter === "poster";
   const showOral = activeFilter === "all" || activeFilter === "oral";
+  const showConference = activeFilter === "all" || activeFilter === "conference";
+  const showManuscripts = activeFilter === "all" || activeFilter === "manuscript";
   
   const getTypeIcon = (pub: Publication) => {
     if (pub.type === "oral") return <Mic className="w-4 h-4" />;
     if (pub.type === "poster") return <Presentation className="w-4 h-4" />;
+    if (pub.type === "conference") return <FileText className="w-4 h-4" />;
+    if (pub.type === "manuscript") return <FileText className="w-4 h-4" />;
     return <FileText className="w-4 h-4" />;
   };
   
   const getTypeLabel = (pub: Publication) => {
     if (pub.type === "oral") return "ORAL";
     if (pub.type === "poster") return "POSTER";
+    if (pub.type === "conference") return "CONFERENCE";
+    if (pub.type === "manuscript") return "MANUSCRIPT";
     return "JOURNAL";
   };
   
@@ -322,7 +337,7 @@ export function AcademicRoom({ publications }: { publications: Publication[] }) 
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
           <button
             onClick={() => setActiveFilter("all")}
             className={`card p-4 shadow-layered text-center transition-all hover:scale-105 cursor-pointer ${
@@ -357,7 +372,25 @@ export function AcademicRoom({ publications }: { publications: Publication[] }) 
             }`}
           >
             <div className="text-2xl font-bold text-primary mb-1">{sortedOral.length}</div>
-            <div className="text-xs text-muted-foreground font-mono">Oral Presentations</div>
+            <div className="text-xs text-muted-foreground font-mono">Oral</div>
+          </button>
+          <button
+            onClick={() => setActiveFilter("conference")}
+            className={`card p-4 shadow-layered text-center transition-all hover:scale-105 cursor-pointer ${
+              activeFilter === "conference" ? "border-2 border-primary bg-primary/5" : ""
+            }`}
+          >
+            <div className="text-2xl font-bold text-primary mb-1">{sortedConference.length}</div>
+            <div className="text-xs text-muted-foreground font-mono">Conference Papers</div>
+          </button>
+          <button
+            onClick={() => setActiveFilter("manuscript")}
+            className={`card p-4 shadow-layered text-center transition-all hover:scale-105 cursor-pointer ${
+              activeFilter === "manuscript" ? "border-2 border-primary bg-primary/5" : ""
+            }`}
+          >
+            <div className="text-2xl font-bold text-primary mb-1">{sortedManuscripts.length}</div>
+            <div className="text-xs text-muted-foreground font-mono">Manuscripts</div>
           </button>
         </div>
 
@@ -533,6 +566,140 @@ export function AcademicRoom({ publications }: { publications: Publication[] }) 
                     <div className={`px-2.5 py-1 rounded text-xs font-mono whitespace-nowrap border flex items-center gap-1.5 ${getTypeColor(pub)}`}>
                       {getTypeIcon(pub)}
                       {getTypeLabel(pub)}
+                    </div>
+                  </div>
+                  <div className="space-y-2 mb-4 text-foreground/80 leading-relaxed text-sm">
+                    {pub.description.map((item, itemIndex) => (
+                      <div key={itemIndex} className="flex items-start gap-2">
+                        <span className="text-primary mt-1.5 text-xs">•</span>
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {pub.links.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-4 border-t border-border/50">
+                      {pub.links.map((link, linkIndex) => (
+                        <a
+                          key={linkIndex}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:text-primary/80 hover:underline transition-colors px-2 py-1 rounded border border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Conference Papers */}
+        {showConference && sortedConference.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-6">
+              <FileText className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-semibold text-foreground">Conference Papers</h2>
+              <div className="flex-1 h-px bg-border/10"></div>
+            </div>
+            <div className="space-y-5">
+              {sortedConference.map((pub, index) => (
+                <div key={index} className="card p-6 shadow-layered hover:scale-[1.01] transition-all group border-l-4 border-l-primary/30">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1 pr-4">
+                      <h3 className="text-lg font-semibold leading-tight text-foreground mb-2 group-hover:text-primary transition-colors">
+                        {pub.title}
+                      </h3>
+                      <div className="flex items-center gap-3 flex-wrap mb-1">
+                        <span className="text-xs text-muted-foreground font-mono">{formatVenue(pub.venue)}</span>
+                        {pub.volume && (
+                          <span className="text-xs px-2 py-0.5 bg-muted/30 rounded border border-border/30 text-muted-foreground">
+                            {pub.volume}
+                          </span>
+                        )}
+                        {getDateFromVenue(pub.venue) && (
+                          <span className="text-xs px-2 py-0.5 bg-muted/30 rounded border border-border/30 text-muted-foreground">
+                            {getDateFromVenue(pub.venue)}
+                          </span>
+                        )}
+                      </div>
+                      {pub.authors && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">{pub.authors}</p>
+                      )}
+                    </div>
+                    <div className={`px-2.5 py-1 rounded text-xs font-mono whitespace-nowrap border flex items-center gap-1.5 ${getTypeColor(pub)}`}>
+                      {getTypeIcon(pub)}
+                      {getTypeLabel(pub)}
+                    </div>
+                  </div>
+                  <div className="space-y-2 mb-4 text-foreground/80 leading-relaxed text-sm">
+                    {pub.description.map((item, itemIndex) => (
+                      <div key={itemIndex} className="flex items-start gap-2">
+                        <span className="text-primary mt-1.5 text-xs">•</span>
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {pub.links.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-4 border-t border-border/50">
+                      {pub.links.map((link, linkIndex) => (
+                        <a
+                          key={linkIndex}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 text-xs font-mono text-primary hover:text-primary/80 hover:underline transition-colors px-2 py-1 rounded border border-primary/20 hover:border-primary/40 hover:bg-primary/5"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          {link.label}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Manuscripts in Preparation */}
+        {showManuscripts && sortedManuscripts.length > 0 && (
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-6">
+              <FileText className="w-5 h-5 text-primary" />
+              <h2 className="text-xl font-semibold text-foreground">Manuscripts in Preparation</h2>
+              <div className="flex-1 h-px bg-border/10"></div>
+            </div>
+            <div className="space-y-5">
+              {sortedManuscripts.map((pub, index) => (
+                <div key={index} className="card p-6 shadow-layered hover:scale-[1.01] transition-all group border-l-4 border-l-primary/30">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex-1 pr-4">
+                      <h3 className="text-lg font-semibold leading-tight text-foreground mb-2 group-hover:text-primary transition-colors">
+                        {pub.title}
+                      </h3>
+                      <div className="flex items-center gap-3 flex-wrap mb-1">
+                        {pub.intendedJournal && (
+                          <span className="text-xs text-muted-foreground font-mono italic">
+                            Intended: {pub.intendedJournal}
+                          </span>
+                        )}
+                        {getDateFromVenue(pub.venue) && (
+                          <span className="text-xs px-2 py-0.5 bg-muted/30 rounded border border-border/30 text-muted-foreground">
+                            {getDateFromVenue(pub.venue)}
+                          </span>
+                        )}
+                        <span className={`text-xs px-2 py-0.5 rounded border ${getTypeColor(pub)} font-mono`}>
+                          {getTypeLabel(pub)}
+                        </span>
+                      </div>
+                      {pub.authors && (
+                        <p className="text-xs text-muted-foreground mt-1 italic">{pub.authors}</p>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-2 mb-4 text-foreground/80 leading-relaxed text-sm">

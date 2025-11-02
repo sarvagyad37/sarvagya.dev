@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { Terminal, Code, BookOpen, Coffee, Gamepad2, Music, Camera, Zap, Github, Linkedin, Mail, ArrowRight, GraduationCap, Trophy, Award } from "lucide-react";
+import { Terminal, Code, BookOpen, Coffee, Gamepad2, Music, Camera, Zap, Github, Linkedin, Mail, ArrowRight, GraduationCap, Trophy, Award, Menu, X } from "lucide-react";
 import Image from "next/image";
 
 interface Room {
@@ -15,7 +15,7 @@ interface Room {
 }
 
 const rooms: Room[] = [
-  { id: "home", name: "Living Room", icon: <Coffee />, description: "Welcome, make yourself at home", path: "/" },
+  { id: "home", name: "Home", icon: <Coffee />, description: "Welcome, make yourself at home", path: "/" },
   { id: "about", name: "About Me", icon: <Code />, description: "Who I am, what I do", path: "/about" },
   { id: "projects", name: "Terminal", icon: <Terminal />, description: "Where I code", path: "/projects" },
   { id: "academic", name: "Papers", icon: <BookOpen />, description: "Where I research", path: "/academic" },
@@ -25,8 +25,8 @@ const rooms: Room[] = [
 
 const roomContexts: Record<string, { title: string; subtitle: string; description: string }> = {
   home: {
-    title: "Living Room",
-    subtitle: "Welcome to my home on the internet",
+    title: "Home",
+    subtitle: "Welcome to sarvagya.dev",
     description: "This is where I hang out. Grab a coffee, explore around, and make yourself comfortable."
   },
   about: {
@@ -61,40 +61,115 @@ export function Navigation() {
   const currentRoom = pathname === "/" ? "home" : pathname.slice(1);
   const currentRoomInfo = rooms.find(r => r.path === pathname) || rooms[0];
   const currentContext = roomContexts[currentRoom] || roomContexts.home;
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Close mobile menu when pathname changes
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
   
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border/40 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0 shadow-sm shadow-green-500/50"></div>
-            <span className="font-mono text-xs sm:text-sm text-muted-foreground hidden sm:inline">sarvagya@dev:~$</span>
-            <span className="font-mono text-xs sm:text-sm text-foreground truncate">cd {pathname === "/" ? "/home" : pathname}</span>
-            <span className="hidden md:inline text-xs text-muted-foreground ml-2">→</span>
-            <span className="hidden md:inline text-xs text-muted-foreground">Enter {currentRoomInfo.name}</span>
-          </div>
-          <div className="flex items-center gap-1.5 overflow-x-auto flex-1 justify-end">
-            {rooms.map((room) => {
-              const isActive = pathname === room.path;
-              return (
-                <Link
-                  key={room.id}
-                  href={room.path}
-                  className={`px-2.5 sm:px-3 py-1.5 text-xs font-mono transition-all duration-200 whitespace-nowrap flex-shrink-0 focus-ring ${
-                    isActive
-                      ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-border"
-                  }`}
-                  title={`Enter ${room.name} - ${room.description}`}
-                >
-                  {room.name}
-                </Link>
-              );
-            })}
+    <>
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-b border-border/40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between gap-4">
+            {/* Left side - Command prompt */}
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse flex-shrink-0 shadow-sm shadow-green-500/50"></div>
+              <span className="font-mono text-xs sm:text-sm text-muted-foreground hidden sm:inline">sarvagya@dev:~$</span>
+              <span className="font-mono text-xs sm:text-sm text-foreground truncate">cd {pathname === "/" ? "/home" : pathname}</span>
+              <span className="hidden lg:inline text-xs text-muted-foreground ml-2">→</span>
+              <span className="hidden lg:inline text-xs text-muted-foreground">Enter {currentRoomInfo.name}</span>
+            </div>
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
+              {rooms.map((room) => {
+                const isActive = pathname === room.path;
+                return (
+                  <Link
+                    key={room.id}
+                    href={room.path}
+                    className={`px-2.5 sm:px-3 py-1.5 text-xs font-mono transition-all duration-200 whitespace-nowrap flex-shrink-0 focus-ring ${
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50 hover:border-border"
+                    }`}
+                    title={`Enter ${room.name} - ${room.description}`}
+                  >
+                    {room.name}
+                  </Link>
+                );
+              })}
+              <a
+                href="https://github.com/sarvagyad37"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 p-1.5 text-muted-foreground hover:text-primary transition-colors flex-shrink-0"
+                title="GitHub"
+              >
+                <Github className="w-4 h-4" />
+              </a>
+            </div>
+            
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+      
+      {/* Mobile Menu */}
+      {mobileMenuOpen && (
+        <div className="fixed top-16 left-0 right-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border/40 shadow-lg md:hidden">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="space-y-2">
+              {rooms.map((room) => {
+                const isActive = pathname === room.path;
+                return (
+                  <Link
+                    key={room.id}
+                    href={room.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-4 py-3 text-sm font-mono transition-all duration-200 rounded ${
+                      isActive
+                        ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                    }`}
+                  >
+                    <div className="font-semibold">{room.name}</div>
+                    <div className="text-xs mt-0.5 opacity-80">{room.description}</div>
+                  </Link>
+                );
+              })}
+              <a
+                href="https://github.com/sarvagyad37"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 px-4 py-3 text-sm font-mono text-muted-foreground hover:text-foreground hover:bg-muted/50 rounded transition-colors"
+              >
+                <Github className="w-4 h-4" />
+                <span>GitHub</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Backdrop for mobile menu */}
+      {mobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-background/50 backdrop-blur-sm z-30 md:hidden"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+    </>
   );
 }
 
@@ -286,14 +361,46 @@ I write code, run experiments, break things, fix them, repeat. Sometimes I publi
       'Epoch 100/100: Probably overfitting (as expected)',
       'Validation accuracy: 72% (better than random, worse than hoped)',
     ],
-    'backtest --run': [
-      'Running backtest...',
-      'Period: 2020-01-01 to 2024-12-31',
-      'Initial capital: $10,000',
-      'Final value: $12,450',
-      'Sharpe ratio: 1.2 (not terrible, not great)',
-      'Max drawdown: 15% (could be worse)',
-      'Wins: 52% (basically coin flip with fees)',
+    'neofetch': [
+      '                   sarvagya@dev',
+      '       ████████████████      OS: macOS (Darwin)',
+      '   ████████████████████████   Host: MacBook Pro',
+      ' ████████████████████████████  Kernel: 24.6.0',
+      ' ████████████████████████████   Uptime: 24/7 coding',
+      ' ████████████████████████████   Shell: zsh',
+      ' ████████████████████████████   Editor: VS Code',
+      ' ████████████████████████████   Terminal: iTerm2',
+      ' ████████████████████████████   Theme: Cyberpunk',
+      ' ████████████████████████████',
+      ' ████████████████████████████   Languages: Python, TypeScript',
+      ' ████████████████████████████   ML: TensorFlow, PyTorch',
+      ' ████████████████████████████   Finance: QuantLib, pandas',
+      ' ████████████████████████████   Physics: PySCF, NEGF',
+      '',
+      ' "code quantum simulations, train ML models, trade options"',
+    ],
+    'fortune': [
+      'You will write code that works on the first try.',
+      '(but probably not)',
+      '',
+      'In the quantum realm, all bugs are features.',
+      '',
+      'The best code is the code you don\'t have to write.',
+      'The second best is code that works.',
+      '',
+      'Remember: overfitting is a feature, not a bug.',
+      '(just kidding, always validate)',
+    ],
+    'matrix': [
+      'Wake up, Neo...',
+      'The Matrix has you...',
+      'Follow the white rabbit.',
+      '',
+      '01001000 01100101 01101100 01101100 01101111',
+      '',
+      'Actually, I just wanted to see if you\'d try this command.',
+      'Did you know I code quantum simulations?',
+      'Pretty cool, right?',
     ],
   };
 
@@ -341,8 +448,16 @@ I write code, run experiments, break things, fix them, repeat. Sometimes I publi
             <Coffee className="w-4 h-4 text-primary" />
             <span className="text-xs text-muted-foreground font-mono">Entering: {roomContext.title}</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">{roomContext.subtitle}</h1>
-          <p className="text-sm text-muted-foreground">{roomContext.description}</p>
+          <div className="flex items-baseline gap-3 flex-wrap mb-2">
+            <h1 className="text-2xl font-bold text-foreground m-0">{roomContext.subtitle}</h1>
+            
+            {/* Retro Connection Box */}
+            <div className="inline-flex items-center border border-border/50 bg-muted/20 px-3 py-1.5 font-mono text-xs">
+              <span className="text-foreground/70">connected to</span>
+              <span className="text-yellow-400 font-semibold ml-1">216.198.79.1</span>
+            </div>
+          </div>
+          <p className="text-sm text-muted-foreground mt-2">{roomContext.description}</p>
         </div>
 
         {/* ASCII Art Name */}
@@ -359,10 +474,11 @@ I write code, run experiments, break things, fix them, repeat. Sometimes I publi
 
         {/* Retro ASCII Header */}
         <div className="mb-6 text-primary leading-tight whitespace-pre flex justify-center">
-          <pre className="text-xs">{`╔═══════════════════════════════════════════════════╗
-║  Software Developer & Researcher                  ║
-║  New Jersey, USA | ${currentTime}                   ║
-╚═══════════════════════════════════════════════════╝`}</pre>
+          <pre className="text-xs">{`╔═══════════════════════════════════════════════════════════════════════════╗
+║                      Software Developer & Researcher                      ║
+║            Quantum Physics | Machine Learning | Computer Vision           ║
+║    Computational Finance | Computational Physics | Distributed Systems    ║
+╚═══════════════════════════════════════════════════════════════════════════╝`}</pre>
         </div>
 
         {/* Main Content Grid - Left Column + Right Sidebar */}
@@ -376,7 +492,7 @@ I write code, run experiments, break things, fix them, repeat. Sometimes I publi
               </div>
               <div className="text-foreground/90 mb-4 leading-relaxed text-sm whitespace-pre-line">
                 {welcomeText}
-                <span className="animate-pulse text-primary">█</span>
+                <span className="inline-block w-2 h-4 bg-primary cursor-blink ml-1"></span>
               </div>
               
               <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2 text-xs pt-3 border-t border-border">
@@ -493,6 +609,9 @@ I write code, run experiments, break things, fix them, repeat. Sometimes I publi
                   <button onClick={() => handleCommand('pwd')} className="px-2 py-1 border border-border hover:bg-primary/10 hover:border-primary transition-colors">
                     pwd
                   </button>
+                  <button onClick={() => handleCommand('ls -la')} className="px-2 py-1 border border-border hover:bg-primary/10 hover:border-primary transition-colors">
+                    ls -la
+                  </button>
                   <button onClick={() => handleCommand('cat .env')} className="px-2 py-1 border border-border hover:bg-primary/10 hover:border-primary transition-colors">
                     cat .env
                   </button>
@@ -528,6 +647,15 @@ I write code, run experiments, break things, fix them, repeat. Sometimes I publi
                   </button>
                   <button onClick={() => handleCommand('backtest --run')} className="px-2 py-1 border border-border hover:bg-primary/10 hover:border-primary transition-colors">
                     backtest --run
+                  </button>
+                  <button onClick={() => handleCommand('neofetch')} className="px-2 py-1 border border-border hover:bg-secondary/10 hover:border-secondary transition-colors" title="Easter egg">
+                    neofetch
+                  </button>
+                  <button onClick={() => handleCommand('fortune')} className="px-2 py-1 border border-border hover:bg-secondary/10 hover:border-secondary transition-colors" title="Easter egg">
+                    fortune
+                  </button>
+                  <button onClick={() => handleCommand('matrix')} className="px-2 py-1 border border-border hover:bg-secondary/10 hover:border-secondary transition-colors" title="Easter egg">
+                    matrix
                   </button>
                 </div>
                 
@@ -576,11 +704,11 @@ I write code, run experiments, break things, fix them, repeat. Sometimes I publi
                 {/* Stats Numbers */}
                 <div className="grid grid-cols-3 gap-2 pb-4 border-b border-border/50">
                   <div className="text-center">
-                    <div className="text-xl text-primary font-bold">7+</div>
+                    <div className="text-xl text-primary font-bold">{publications ? publications.length : 14}</div>
                     <div className="text-xs text-muted-foreground mt-1">Publications</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-xl text-primary font-bold">5+</div>
+                    <div className="text-xl text-primary font-bold">{projects ? projects.length : 10}</div>
                     <div className="text-xs text-muted-foreground mt-1">Projects</div>
                   </div>
                   <div className="text-center">
@@ -807,88 +935,68 @@ export function AboutRoom() {
           </div>
         </div>
 
-        {/* Research Highlights */}
+        {/* Research & Academic Highlights - Combined */}
         <div className="card p-6 shadow-layered mb-6">
-          <div className="text-primary mb-4 text-base font-bold">RESEARCH HIGHLIGHTS</div>
-          <div className="space-y-3 text-foreground/80 text-sm">
-            <div className="flex items-start gap-3">
-              <span className="text-primary mt-1">•</span>
-              <div>
-                <span className="font-semibold text-foreground">Spectral Learning for Financial Regimes</span>
-                <p className="text-foreground/70 mt-1">Low-rank Hankel–SVD representations for regime shift detection in financial markets</p>
+          <div className="text-primary mb-6 text-base font-bold">RESEARCH & ACADEMIC HIGHLIGHTS</div>
+          
+          {/* Research Highlights */}
+          <div className="mb-6">
+            <h3 className="text-sm font-semibold text-foreground mb-4 text-primary/80">RESEARCH</h3>
+            <div className="space-y-3 text-foreground/80 text-sm">
+              <div className="flex items-start gap-3">
+                <span className="text-primary mt-1">•</span>
+                <div>
+                  <span className="font-semibold text-foreground">Spectral Learning for Financial Regimes</span>
+                  <p className="text-foreground/70 mt-1">Low-rank Hankel–SVD representations for regime shift detection in financial markets</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-primary mt-1">•</span>
-              <div>
-                <span className="font-semibold text-foreground">Spectral Surrogate Modeling of Functionally Graded Plates</span>
-                <p className="text-foreground/70 mt-1">Physics-informed surrogate models using Hankel–SVD features and Dynamic Stiffness Method</p>
+              <div className="flex items-start gap-3">
+                <span className="text-primary mt-1">•</span>
+                <div>
+                  <span className="font-semibold text-foreground">Spectral Surrogate Modeling of Functionally Graded Plates</span>
+                  <p className="text-foreground/70 mt-1">Physics-informed surrogate models using Hankel–SVD features and Dynamic Stiffness Method</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <span className="text-primary mt-1">•</span>
-              <div>
-                <span className="font-semibold text-foreground">Quantum Transport Simulation</span>
-                <p className="text-foreground/70 mt-1">DFT + NEGF implementation for modeling charge transport in nanoscale electronic systems</p>
+              <div className="flex items-start gap-3">
+                <span className="text-primary mt-1">•</span>
+                <div>
+                  <span className="font-semibold text-foreground">Quantum Transport Simulation</span>
+                  <p className="text-foreground/70 mt-1">DFT + NEGF implementation for modeling charge transport in nanoscale electronic systems</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Academic Leadership & Achievements - Combined */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           {/* Academic Leadership */}
-          <div className="card p-6 shadow-layered">
-            <div className="text-primary mb-4 text-base font-bold">ACADEMIC LEADERSHIP</div>
-            <div className="space-y-4">
+          <div>
+            <h3 className="text-sm font-semibold text-foreground mb-4 text-primary/80">LEADERSHIP</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-1">President, Rowan FinTech Club</h3>
-                <p className="text-xs text-muted-foreground mb-1">2024–Present</p>
+                <h4 className="text-sm font-semibold text-foreground mb-1">President, Rowan FinTech Club</h4>
+                <p className="text-xs text-muted-foreground mb-1">2024–2025</p>
                 <p className="text-foreground/70 text-xs leading-relaxed">Leading research discussions on quantitative finance, algorithmic trading models, and stochastic processes.</p>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-1">Web Master, IEEE Rowan Chapter</h3>
+                <h4 className="text-sm font-semibold text-foreground mb-1">Web Master, IEEE Rowan Chapter</h4>
+                <p className="text-xs text-muted-foreground mb-1">2024–2025</p>
                 <p className="text-foreground/70 text-xs leading-relaxed">Managing research outreach, technical communications, and conference participation logistics.</p>
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-foreground mb-1">Event Coordinator, ACM Rowan Chapter</h3>
-                <p className="text-xs text-muted-foreground mb-1">2023–Present</p>
+                <h4 className="text-sm font-semibold text-foreground mb-1">Event Coordinator, ACM Rowan Chapter</h4>
+                <p className="text-xs text-muted-foreground mb-1">2023–2025</p>
                 <p className="text-foreground/70 text-xs leading-relaxed">Organizing technical seminars, coding theory workshops, and ML reading groups for student researchers.</p>
               </div>
-            </div>
-          </div>
-
-          {/* Hackathons & Achievements */}
-          <div className="card p-6 shadow-layered">
-            <div className="text-primary mb-4 text-base font-bold">ACHIEVEMENTS</div>
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <Trophy className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-foreground mb-1">Co-Lead, IEEE ProfHacks Hackathon 2023</h3>
-                  <p className="text-foreground/70 text-xs leading-relaxed">Designed challenge frameworks and coordinated interdisciplinary project mentoring.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Award className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-foreground mb-1">2nd Place, IEEE ProfHacks Hackathon 2022</h3>
-                  <p className="text-foreground/70 text-xs leading-relaxed">Multi-agent computational problem-solving project.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <Award className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-foreground mb-1">2nd Place, Kryptonyte CTF 2022</h3>
-                  <p className="text-foreground/70 text-xs leading-relaxed">Algorithmic reasoning and real-time systems debugging.</p>
-                </div>
+              <div>
+                <h4 className="text-sm font-semibold text-foreground mb-1">Co-Lead, IEEE ProfHacks Hackathon</h4>
+                <p className="text-xs text-muted-foreground mb-1">2023</p>
+                <p className="text-foreground/70 text-xs leading-relaxed">Designed challenge frameworks and coordinated interdisciplinary project mentoring.</p>
               </div>
             </div>
           </div>
         </div>
 
         {/* Updates/Timeline */}
-        <div className="card p-6 shadow-layered">
+        <div className="card p-6 shadow-layered mb-6">
           <div className="text-primary mb-6 text-base font-bold">RECENT UPDATES</div>
           <div className="space-y-6 relative pl-6 border-l-2 border-primary/30">
             {updates.map((update, index) => (
@@ -905,6 +1013,56 @@ export function AboutRoom() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        {/* Achievements - Full Width */}
+        <div className="card p-6 shadow-layered">
+          <div className="text-primary mb-6 text-base font-bold flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-primary" />
+            ACHIEVEMENTS & AWARDS
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex items-start gap-3">
+              <Trophy className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-foreground mb-1">3rd Place, SkillSwap</h3>
+                <p className="text-xs text-muted-foreground mb-1">Temple University OwlHacks 2025</p>
+                <p className="text-foreground/70 text-xs leading-relaxed">Token-based community skill-exchange platform with lightweight on-chain/off-chain blockchain rewards+trust model. Led UI/UX and data logic integration.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Trophy className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-foreground mb-1">3rd Place, SeaSOS</h3>
+                <p className="text-xs text-muted-foreground mb-1">NJIT HackTheLoc 2024</p>
+                <p className="text-foreground/70 text-xs leading-relaxed">AI maritime emergency response system with Unity-AR navigation, Swift/iOS UI, FastAPI microservices, Redis Stack, and real-time evacuation routing.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Trophy className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-foreground mb-1">1st Place, MediSync</h3>
+                <p className="text-xs text-muted-foreground mb-1">UPMC Hack 2023</p>
+                <p className="text-foreground/70 text-xs leading-relaxed">AI-enhanced VR health system combining immersive collaboration environments with computer vision for automated medical analysis.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Award className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-foreground mb-1">2nd Place, BlocSoc</h3>
+                <p className="text-xs text-muted-foreground mb-1">IEEE ProfHacks 2022</p>
+                <p className="text-foreground/70 text-xs leading-relaxed">Developed NFT authentication protocol for decentralized apps with blockchain-based identity credentials. Built censorship-resistant blogging platform with governance system enabling verified users to participate in content moderation and platform development.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <Award className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-foreground mb-1">2nd Place, Kryptonyte CTF</h3>
+                <p className="text-xs text-muted-foreground mb-1">2022</p>
+                <p className="text-foreground/70 text-xs leading-relaxed">Competed in capture-the-flag cybersecurity competition, demonstrating strong algorithmic reasoning skills and real-time systems debugging capabilities. Solved complex cryptographic challenges and reverse engineering problems under time constraints.</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
